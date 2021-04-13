@@ -1,5 +1,38 @@
 import React, { useState } from 'react'
 
+const Statistics = (props) => {
+  if (props.kaikki == 0) return (
+    <div>
+    <p>Ei annettua palautetta</p>
+    </div>
+  )
+  return (
+      <div>
+        <StatisticsLine text="hyvä" value={props.hyva}/>
+        <StatisticsLine text="neutraali" value={props.neutraali}/>
+        <StatisticsLine text="huono" value={props.huono}/>
+        <StatisticsLine text="kaikki" value={props.kaikki}/>
+        <StatisticsLine text="keskiarvo" value={props.ka}/>
+        <StatisticsLine text="positiivinen" value={props.hyva/props.kaikki}/>
+      </div>
+  )
+}
+
+
+const StatisticsLine = ({text, value}) => {
+  return (
+    <p>{text} {value}</p>
+  )
+}
+
+const Button = ({funktio, text}) => {
+  return (
+    <button onClick={funktio}>
+      {text}
+    </button>
+  )
+}
+
 const App = (props) => {
   const [ hyva, setHyva ] = useState(0)
   const kasvataHyva = () => setHyva(hyva + 1)
@@ -17,24 +50,15 @@ const App = (props) => {
   return (
     <div>
       <h1>Anna palautetta</h1>
-      <button onClick={kasvataHyva}>
-      hyvä
-      </button>
-      <button onClick={kasvataNeutraali}>
-      neutraali
-      </button>
-      <button onClick={kasvataHuono}>
-      huono
-      </button>
+      <Button funktio={kasvataHyva} text="Hyvä"></Button>
+      <Button funktio={kasvataNeutraali} text="Neutraali"></Button>
+      <Button funktio={kasvataHuono} text="Huono"></Button>
       <h1>
-        Tilastot
+      Tilastot
       </h1>
-      <p>hyvä {hyva}</p>
-      <p>neutraali {neutraali}</p>
-      <p>huono {huono}</p>
-      <p>kaikki {kaikki}</p>
-      <p>keskiarvo {ka}</p>
-      <p>positiivinen { hyva/kaikki }</p>
+      <Statistics hyva={hyva} neutraali={neutraali}
+      huono={huono} kaikki={kaikki} ka={ka} />
+
     </div>
   )
 
