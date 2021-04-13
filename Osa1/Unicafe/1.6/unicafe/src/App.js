@@ -10,6 +10,9 @@ const App = (props) => {
   const [ huono, setHuono ] = useState(0)
   const kasvataHuono = () => setHuono(huono + 1)
 
+  const kaikki = hyva + neutraali + huono
+  const ka = (hyva*1 + huono*-1)/kaikki
+
 
   return (
     <div>
@@ -29,6 +32,9 @@ const App = (props) => {
       <p>hyvä {hyva}</p>
       <p>neutraali {neutraali}</p>
       <p>huono {huono}</p>
+      <p>kaikki {kaikki}</p>
+      <p>keskiarvo {ka}</p>
+      <p>positiivinen { hyva/kaikki }</p>
     </div>
   )
 
