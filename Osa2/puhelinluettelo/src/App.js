@@ -1,14 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 
 const App = () => {
-  // lista henkilöjen ylläpitämiseksi
-  const [ persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-6969-6969'},
-    { name: 'Andy Pandy', number: '040-420-666', },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ]) 
+  const [persons, setPersons] = useState([])
+
+  useEffect(() => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+        setPV(response.data)
+      })
+  }, [])
+  console.log('render', persons.length, 'persons')
 
   // lista henkilöiden näyttämiseksi
   const [ personsView, setPV] = useState([...persons])
