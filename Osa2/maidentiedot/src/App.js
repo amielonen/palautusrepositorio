@@ -4,72 +4,124 @@ import './App.css';
 
 const App = () => {
   const [countries, setCountries] = useState([])
-  const [search, setSearch] = useState('')
   const [countriesView, setCV] = useState([...countries])
+  const [search, setSearch] = useState("")
   const [ccount, setccount] = useState(0)
 
   useEffect(() => {
-    let isMounted = true;
     axios
       .get('https://restcountries.eu/rest/v2/all')
-      .then(response => {
-        if (isMounted) setCountries(response.data);
-      })
-      return () => {isMounted = false}
-  })
+      .then(response => setCountries(response.data))
+  }, []);
 
   const handleSearch = (event) => {
     event.preventDefault()
-    var countriesTemp = countries.filter((country) => country.name.includes(event.target.value))
-    setccount(countriesTemp.length)
-    setCV(countriesTemp)
+    var cTemp = countries.filter((country) => 
+    country.name.toLowerCase().includes(event.target.value))
+    setccount(cTemp.length)
+    setCV(cTemp)
     setSearch(event.target.value)
+  }
+
+
+  function handleClick(c) {
+    setSearch(c.name.toLowerCase())
+    var cTemp = countries.filter((country) => 
+    country.name.toLowerCase().includes(c.name.toLowerCase()))
+    setccount(cTemp.length)
+    setCV(cTemp)
+    setSearch(c.name.toLowerCase())
   }
 
   return (
     <div>
       <p>find countries</p>
       <SearchFilter search={search} func={handleSearch} />
-      <Countries countries={countriesView} count={ccount} />
+      <Countries countries={countriesView} count={ccount} handleClick={handleClick}/>
     </div>
   )
-}
+} // App loppuu
 
-//=============================//
-
-const Countries = ({countries, count}) => {
-  if (count > 10) return (<p></p>)
-  if (count === 1) return (
-    <div>
-      <CountryInfo countries={countries} />
-    </div>
-  )
+const SearchFilter = ({search, func}) => {
   return (
-    <div>
-      {countries.map((country, i) => <p key={i}>{country.name}</p>)}
-    </div>
+    <input value={search} onChange={func} />
   )
 }
 
+const Countries = ({countries, count, handleClick}) => {
+  if (count > 10) return (<p>Too many matches, specify another</p>)
 
-const CountryInfo = ({countries}) => {
-  var c = countries[0]
-  var languages=c.languages
+  if (count === 1) {
+    var ctr = countries[0]
+    return (
+    <div>
+      <CountryInfo ctr={ctr} />
+    </div>
+    )}
+
+    const countriesList = countries.map((country) => {
+      return (
+        <div key={country.alpha2Code}>
+          {country.name} {" "}
+          <button onClick={() => handleClick(country)} id={country.name}>show details</button>
+        </div>
+      )
+    })
+
+  return (
+    <div>{countriesList}</div>
+  )
+}
+
+const Weather = ({country}) => {
+  const [weather, setWeather] = useState([])
+
+  useEffect(() => {
+    const Url = "http://api.weatherstack.com/current"
+    const ACCESS_KEY = process.env.REACT_APP_API_KEY;
+    const capital = country.capital
+
+    axios
+      .get(`${Url}?access_key=${ACCESS_KEY}&query=${capital}`)
+      .then((response) => {
+        setWeather(response.data)
+      })
+  }, [])
+
+      return (
+        <div>
+            <p>
+                <b>temperature:</b> {weather.current ? weather.current.temperature : "none"} Celcius
+            </p>
+            <img src={weather.current ? weather.current.weather_icons[0] : "none"} alt="img" width="100" height="100" />
+            
+            <p>
+                <b>wind:</b> {weather.current ? weather.current.wind_speed : "none"} mph direction &nbsp;
+                {weather.current ? weather.current.wind_dir : "none"}
+            </p>
+        </div>
+      )
+
+};
+
+
+const CountryInfo = ({ctr}) => {
+  var languages=ctr.languages
   return(
     <div>
-      <h2>{c.name}</h2>
-      <p>capital {c.capital}</p>
-      <p>population {c.population}</p>
+      <h2>{ctr.name}</h2>
+      <p>capital {ctr.capital}</p>
+      <p>population {ctr.population}</p>
       <h1>languages</h1>
       <Languages languages={languages}/>
       <div>
-      <img src={c.flag} alt="Flag of the nation"></img>
-      </div>
-      
+      <img src={ctr.flag} width={"150px"} alt="Flag of the nation"></img>
+      <Weather country={ctr}/>
+      </div>   
     </div>
   )
-
 }
+
 
 const Languages = ({languages}) => {
   return(
@@ -82,11 +134,5 @@ const Languages = ({languages}) => {
 
 }
 
-
-const SearchFilter = ({search, func}) => {
-  return (
-    <input value={search} onChange={func} />
-  )
-}
 
 export default App;
