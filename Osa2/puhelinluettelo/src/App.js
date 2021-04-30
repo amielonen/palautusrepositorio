@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
 
-  useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-        setPV(response.data)
+    useEffect(() => {
+      personService
+      .getAll()
+      .then(p => {
+        setPersons(p)
+        setPV(p)
       })
   }, [])
   console.log('render', persons.length, 'persons')
@@ -30,7 +29,6 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-
     persons.forEach(element => {
       if (element.name === personObject.name) {
         window.alert(`${personObject.name} is already added to phonebook`)
@@ -38,10 +36,26 @@ const App = () => {
       }
     });
     if (found === true) return
-    setPersons(persons.concat(personObject))
-    setPV(persons.concat(personObject))
-    setnewName('')
-    setNewNumber('')
+    personService
+    .create(personObject)
+    .then(returnedPerson => {
+      setPersons(persons.concat(returnedPerson))
+      setPV(persons.concat(returnedPerson))
+      setnewName('')
+      setNewNumber('')
+    })
+  }
+
+
+  const removePerson = (personToDelete) => {
+    if (window.confirm(`Do you really want do delete ${personToDelete.name} ?` )) {
+      personService
+      .remove(personToDelete)
+      .then(() =>
+        setPV(personsView.filter(p => p.id !== personToDelete.id))
+      )
+    }
+    return;
   }
 
   const handlenewName = (event) => {
@@ -69,7 +83,7 @@ const App = () => {
       handlenewName={handlenewName} newNumber={newNumber}
       handleNewNumber={handleNewNumber}  />
       <h2>Numbers</h2>
-      <Persons pv={personsView}/>
+      <Persons pv={personsView} removePerson={removePerson}/>
     </div>
   )
 }
@@ -100,10 +114,24 @@ const NewPerson = ({addPerson, newName, handlenewName, newNumber, handleNewNumbe
   )
 }
 
-const Persons = ({pv}) => {
+const Person = ({person, remove}) => {
   return (
-    <div>{pv.map((person, i) => <p key={i}> {person.name} {person.number} </p>)} </div>
+    <p>
+      {person.name}: {person.number} <button onClick={remove}>Delete</button>
+    </p>
   )
 }
+
+const Persons = ({pv, removePerson}) => {
+  return (
+    <div>
+      {pv.map(person => 
+        <Person key={person.id} person={person} remove={() =>
+        removePerson(person)}/>
+      )}
+    </div>
+  )
+}
+
 
 export default App
