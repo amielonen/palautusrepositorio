@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import personService from './services/persons'
+import './App.css'
 
 const App = () => {
   const [persons, setPersons] = useState([])
+    // lista henkilöiden näyttämiseksi
+    const [ personsView, setPV] = useState([...persons])
+    const [ newName, setnewName ] = useState('')
+    const [ newNumber, setNewNumber ] = useState('')
+    const [ search, setSearch ] = useState('')
+    const [succes, setSuccess] = useState(null)
 
     useEffect(() => {
       personService
@@ -14,13 +21,16 @@ const App = () => {
   }, [])
   console.log('render', persons.length, 'persons')
 
-  // lista henkilöiden näyttämiseksi
-  const [ personsView, setPV] = useState([...persons])
 
-  const [ newName, setnewName ] = useState('')
-  const [ newNumber, setNewNumber ] = useState('')
-  const [ search, setSearch ] = useState('')
 
+  const getPersons = () => {
+    personService
+    .getAll()
+    .then(p => {
+      setPersons(p)
+      setPV(p)
+    })
+  }
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -29,9 +39,26 @@ const App = () => {
       name: newName,
       number: newNumber
     }
+
+    const previous = personsView.find(person => person.name === newName)
+
     persons.forEach(element => {
       if (element.name === personObject.name) {
-        window.alert(`${personObject.name} is already added to phonebook`)
+        if (window.confirm(`${personObject.name} is already added to phonebook, replace the old number with a new one?` )) {
+
+        personObject.id = element.id
+          personService
+          .update(previous.id, personObject)
+          .then(getPersons(),
+          setSuccess(
+            `'${personObject.name}''s nubmer was replaced succesfully`
+          ),
+          setTimeout(() => {
+            setSuccess(null)
+          }, 5000)
+          )
+        }
+
         found = true
       }
     });
@@ -43,6 +70,10 @@ const App = () => {
       setPV(persons.concat(returnedPerson))
       setnewName('')
       setNewNumber('')
+      setSuccess(`'${personObject.name}' was added successfully`)
+      setTimeout(() => {
+        setSuccess(null)
+      }, 5000);
     })
   }
 
@@ -52,7 +83,13 @@ const App = () => {
       personService
       .remove(personToDelete)
       .then(() =>
-        setPV(personsView.filter(p => p.id !== personToDelete.id))
+        setPV(personsView.filter(p => p.id !== personToDelete.id)),
+        setSuccess(
+          `Person '${personToDelete.name}' was deleted succesfully`
+        ),
+        setTimeout(() => {
+          setSuccess(null)
+        }, 5000)
       )
     }
     return;
@@ -76,6 +113,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={succes}></Notification>
       <label htmlFor="name">filter shown with</label>
       <SearchFilter search={search} func={handleSearch} />
       <h2>add a new</h2>
@@ -83,7 +121,7 @@ const App = () => {
       handlenewName={handlenewName} newNumber={newNumber}
       handleNewNumber={handleNewNumber}  />
       <h2>Numbers</h2>
-      <Persons pv={personsView} removePerson={removePerson}/>
+      <Persons personsView={personsView} removePerson={removePerson}/>
     </div>
   )
 }
@@ -116,19 +154,29 @@ const NewPerson = ({addPerson, newName, handlenewName, newNumber, handleNewNumbe
 
 const Person = ({person, remove}) => {
   return (
-    <p>
+    <div>
       {person.name}: {person.number} <button onClick={remove}>Delete</button>
-    </p>
+    </div>
   )
 }
 
-const Persons = ({pv, removePerson}) => {
+const Persons = ({personsView, removePerson}) => {
   return (
     <div>
-      {pv.map(person => 
+      {personsView.map(person => 
         <Person key={person.id} person={person} remove={() =>
         removePerson(person)}/>
       )}
+    </div>
+  )
+}
+
+const Notification = ({message}) => {
+  if (message === null) {return null}
+
+  return (
+    <div className="good">
+      {message}
     </div>
   )
 }
