@@ -10,6 +10,7 @@ const App = () => {
     const [ newNumber, setNewNumber ] = useState('')
     const [ search, setSearch ] = useState('')
     const [succes, setSuccess] = useState(null)
+    const [errorMsg, setErrorMsg] = useState(null)
 
     useEffect(() => {
       personService
@@ -44,8 +45,8 @@ const App = () => {
 
     persons.forEach(element => {
       if (element.name === personObject.name) {
-        if (window.confirm(`${personObject.name} is already added to phonebook, replace the old number with a new one?` )) {
-
+        if (window.confirm(`${personObject.name} is already added to phonebook, replace the old number with a new one?` ))
+        {
         personObject.id = element.id
           personService
           .update(previous.id, personObject)
@@ -56,7 +57,15 @@ const App = () => {
           setTimeout(() => {
             setSuccess(null)
           }, 5000)
-          )
+          ).catch(error => {
+            console.log('Error: ', error.response.data)
+            setErrorMsg(error.response.data.error)
+            setTimeout(() => {
+              setErrorMsg(null)
+            }, 3000);
+            setPersons(persons)
+            setPV(persons)
+          })
         }
 
         found = true
@@ -73,6 +82,12 @@ const App = () => {
       setSuccess(`'${personObject.name}' was added successfully`)
       setTimeout(() => {
         setSuccess(null)
+      }, 5000)
+    }).catch(error => {
+      console.log('Error: ', error.response.data)
+      setErrorMsg(error.response.data.error)
+      setTimeout(() => {
+        setErrorMsg(null)
       }, 5000);
     })
   }
@@ -114,6 +129,7 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       <Notification message={succes}></Notification>
+      <Error message={errorMsg}></Error>
       <label htmlFor="name">filter shown with</label>
       <SearchFilter search={search} func={handleSearch} />
       <h2>add a new</h2>
@@ -176,6 +192,16 @@ const Notification = ({message}) => {
 
   return (
     <div className="good">
+      {message}
+    </div>
+  )
+}
+
+const Error = ({message}) => {
+  if (message === null) {return null}
+
+  return (
+    <div className="bad">
       {message}
     </div>
   )
