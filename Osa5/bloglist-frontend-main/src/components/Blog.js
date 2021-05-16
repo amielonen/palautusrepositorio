@@ -77,7 +77,7 @@ const deleteBlog = () => {
 
 export default Blog
 
-Blog.PropTypes = {
+Blog.propTypes = {
 updateLikes: PropTypes.func.isRequired,
 removeBlog: PropTypes.func.isRequired
 }
