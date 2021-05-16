@@ -6,8 +6,6 @@
     "babel": true
   },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.11.9",
-    "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.6.3",
     "axios": "^0.21.1",
     "prop-types": "^15.7.2",
@@ -43,6 +41,8 @@
   },
   "proxy": "http://localhost:3003",
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.12.0",
+    "@testing-library/react": "^11.2.7",
     "eslint-plugin-jest": "^24.3.6"
   }
 }
