@@ -5,15 +5,16 @@ const Blog = ({blog, user, updateLikes, removeBlog}) => {
   const [visible, setVisible] = useState(false)
   const [poster, setPoster] = useState('')
   const [username, setUsername] = useState('')
+  const addedByUser = user.name === blog.user.name
 
   const hideWhenVisible = { display: visible ? 'none' : '' }
   const showWhenVisible = { display: visible ? '' : 'none' }
 
 
-  const toggleVisibility = () => {
+  const toggleVisibility = () => { 
     setVisible(!visible)
   }
-
+  
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -37,16 +38,6 @@ const addLike = () => {
 }
 
 
-const deleteButton = () => {
-  if (user.name === blog.user?.name || user.name === poster) {
-    return (
-      <div>
-        <button onClick={deleteBlog}>remove</button>
-      </div>
-    )
-  }
-}
-
 const deleteBlog = () => {
   removeBlog(blog)
 }
@@ -56,18 +47,24 @@ const deleteBlog = () => {
       <div>
         {blog.title} by {blog.author}
         <div style={hideWhenVisible}>
-          <button onClick={toggleVisibility}>show details</button>
+          <button id="toggleshowbutton" onClick={toggleVisibility}>show details</button>
         </div>
         <div style={showWhenVisible}>
           <p>{blog.url}</p>
           <p>
             likes {blog.likes}
-            <button onClick={addLike}>like</button>
+            <button id="likebutton" onClick={addLike}>like</button>
           </p>
           <div>
             {blog.user?.name || poster}
           </div>
-          {deleteButton()}
+
+          {addedByUser && (
+                  <div>
+                  <button id="deletebutton" onClick={deleteBlog}>remove</button>
+                </div>
+          )}
+
           <button onClick={toggleVisibility}>hide details</button>
         </div>
       </div>
