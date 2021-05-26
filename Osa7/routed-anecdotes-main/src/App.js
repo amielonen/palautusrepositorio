@@ -10,30 +10,56 @@ import {
   useHistory,
   useRouteMatch,
 } from "react-router-dom"
+import { Table, Form, Button, Alert, Navbar, Nav } from 'react-bootstrap'
 
 const Menu = () => {
   const padding = {
     paddingRight: 5
   }
+
   return (
+  <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+    <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+    <Navbar.Collapse id="responsive-navbar-nav">
+      <Nav className="mr-auto">
+       <Nav.Link href="#" as="span">
+        <Link style={padding} to="/">anecdotes</Link>
+      </Nav.Link>
+      <Nav.Link href="#" as="span">
+        <Link style={padding} to="/create">create new</Link>
+      </Nav.Link>
+      <Nav.Link href="#" as="span">
+        <Link style={padding} to="/about">about</Link>
+      </Nav.Link>
+    </Nav>
+  </Navbar.Collapse>
+</Navbar>
+/*
     <div>
       <a href='/' style={padding}>anecdotes</a>
       <a href='/create' style={padding}>create new</a>
       <a href='about' style={padding}>about</a>
-    </div>
+    </div>*/
   )
 }
 
 const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
-    <ul>
+    <Table striped>
+      <tbody>
       {anecdotes.map(anecdote => 
-        <li key={anecdote.id} >
+        <tr key={anecdote.id}>
+          <td>
           <Link to={`/anecdotes/${anecdote.id}`}>{anecdote.content}</Link>
-        </li>
+          </td>
+          <td>
+            {anecdote.votes}
+          </td>
+        </tr>
       )}
-    </ul>
+      </tbody>
+    </Table>
   </div>
 )
 
@@ -67,7 +93,6 @@ const CreateNew = (props) => {
   const { clear: clearInfo, ...info} = useField('text')
   const history = useHistory()
 
-
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
@@ -89,6 +114,27 @@ const CreateNew = (props) => {
     clearAuthor()
     clearInfo()
   }
+
+  return (
+    <div>
+      <h2>create a new anecdote</h2>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group>
+          <Form.Label>content</Form.Label>
+          <Form.Control {...content}
+        />
+          <Form.Label>author</Form.Label>
+          <Form.Control {...author}
+        />
+          <Form.Label>info</Form.Label>
+          <Form.Control {...info}
+        />
+        <Button variant="primary" type="submit">create</Button>
+        </Form.Group>
+      </Form>
+    </div>
+  )
+
 
   return (
     <div>
@@ -180,10 +226,13 @@ const App = () => {
 
 
   return (
-    <div>
+    <div className="container">
         <div>
           <h1>Software anecdotes</h1>
-          <Notification notification={notification} />
+          {(notification &&
+            <Alert variant="success">
+              {notification}
+            </Alert>)}
           <Menu />
         </div>
 
