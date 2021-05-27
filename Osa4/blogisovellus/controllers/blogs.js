@@ -1,4 +1,5 @@
 const router = require('express').Router()
+const { response } = require('express')
 const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
@@ -29,12 +30,41 @@ router.delete('/:id', async (request, response) => {
   response.status(204).end()
 })
 
+
 router.put('/:id', async (request, response) => {
   const blog = request.body
 
   const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
   response.json(updatedBlog.toJSON())
 })
+
+/*
+router.put("/:id", async (request, response, next) => {
+  const { body, token } = request
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+
+    if (!token || !decodedToken.id) {
+       return response.status(401).end()
+    }
+
+    const blog = await Blog.findById(request.params.id)
+    if (!blog) return response.status(404).end()
+
+    blog.author = body.author
+    blog.title = body.title
+    blog.url = body.title
+    blog.likes = body.likes
+    blog.user = body.user
+
+    const updatedBlog = await blog.save()
+    await updatedBlog.populate({ path: "user", select: ["name", "username"] })
+    .execPopulate()
+
+    return response.json(updatedBlog.toJSON()).status(200).end()
+  } catch (err) { return next(err)}
+})*/
 
 router.post('/', async (request, response) => {
   const blog = new Blog(request.body)

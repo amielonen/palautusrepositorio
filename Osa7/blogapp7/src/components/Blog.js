@@ -14,6 +14,10 @@ const Blog = ({ blog, handleLike, handleRemove, own }) => {
 
   const label = visible ? 'hide' : 'view'
 
+  const like = () => {
+    handleLike(blog.id)
+  }
+
   return (
     <div style={blogStyle} className='blog'>
       <div>
@@ -23,10 +27,10 @@ const Blog = ({ blog, handleLike, handleRemove, own }) => {
         <div>
           <div>{blog.url}</div>
           <div>likes {blog.likes}
-            <button onClick={() => handleLike(blog.id)}>like</button>
+            <button onClick={like}>like</button>
           </div>
           <div>{blog.user.name}</div>
-          {own&&<button onClick={() => handleRemove(blog.id)}>remove</button>}
+          {own&&<button onClick={() => handleRemove(blog)}>remove</button>}
         </div>
       )}
     </div>

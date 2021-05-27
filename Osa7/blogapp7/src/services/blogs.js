@@ -19,10 +19,19 @@ const create = (blog) => {
   return request.then(response => response.data)
 }
 
+/*
 const update = (blog) => {
   const request = axios.put(`${baseUrl}/${blog.id}`, blog, getConfig())
   return request.then(response => response.data)
 }
+*/
+
+const update = async (id, blog) => {
+  const config = getConfig()
+  const response = await axios.put(`${baseUrl}/${id}`, blog, config)
+  return response.data
+}
+
 
 const remove = (id) => {
   const request = axios.delete(`${baseUrl}/${id}`, getConfig())
