@@ -5,24 +5,39 @@ import Togglable from './components/Togglable'
 import NewBlog from './components/NewBlog'
 import { setNotification } from "./reducers/notificationReducer"
 import { useDispatch, useSelector } from 'react-redux'
-import blogService from './services/blogs'
 import loginService from './services/login'
 import storage from './utils/storage'
 import { initializeBlogs } from './reducers/blogsReducer'
 import { addBlog } from './reducers/blogsReducer'
 import { addLike } from './reducers/blogsReducer'
 import { removeBlog } from './reducers/blogsReducer'
+import { initializeUser, setUser } from './reducers/userReducer'
+import Users from './components/Users'
+import User from './components/UserPage'
+import { initUsers } from './reducers/usersReducer'
+import {
+  BrowserRouter as Router,
+  Switch, Route, Link
+} from "react-router-dom"
 
-
-
+//styles
+import Container from '@material-ui/core/Container'
+import {
+  Button,
+  TextField, 
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
+} from '@material-ui/core'
+import UserPage from './components/UserPage'
 
 
 const App = () => {
-  //const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-
 
   const blogFormRef = React.createRef()
 
@@ -33,17 +48,19 @@ const App = () => {
   }, [dispatch])
 
   const blogs = useSelector(state => state.blogs)
-  /*
-  useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
-  }, [])*/
 
   useEffect(() => {
-    const user = storage.loadUser()
-    setUser(user)
-  }, [])
+     //haetaan storagesta user muuttujaan
+    dispatch(initializeUser) //dispatsataan user storeen
+  }, [dispatch])
+
+  useEffect(() => {
+    dispatch(initUsers())
+  }, [dispatch])
+
+ const users = useSelector(state => state.users)
+
+  const user = useSelector(state => state.user)
 
   const notifyWith = (message, messageType='success') => {
     dispatch(setNotification({
@@ -61,7 +78,7 @@ const App = () => {
 
       setUsername('')
       setPassword('')
-      setUser(user)
+      dispatch(setUser(user))
       notifyWith(`${user.name} welcome back!`, 'success')
       storage.saveUser(user)
     } catch(exception) {
@@ -70,25 +87,10 @@ const App = () => {
   }
 
   const createBlog = (blog) => {
-    /*try {
-      const newBlog = await blogService.create(blog)
-      blogFormRef.current.toggleVisibility()
-      setBlogs(blogs.concat(newBlog))
-      notifyWith(`a new blog '${newBlog.title}' by ${newBlog.author} added!`, 'success')
-    } catch(exception) {
-      console.log(exception)
-    }*/
     dispatch(addBlog(blog))
   }
 
-  const handleLike = (id) => {/*
-    const blogToLike = blogs.find(b => b.id === id)
-    const likedBlog = { ...blogToLike, likes: blogToLike.likes + 1, user: blogToLike.user.id }
-    await blogService.update(likedBlog)
-    setBlogs(blogs.map(b => b.id === id ?  { ...blogToLike, likes: blogToLike.likes + 1 } : b))
-    */
-   //const blogToLike = blogs.find(b => b.id === id)
-
+  const handleLike = (id) => {
    dispatch(addLike(id))
   }
 
@@ -97,8 +99,12 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    setUser(null)
+    dispatch(setUser(null))
     storage.logoutUser()
+  }
+
+  const buttonStyle = {
+    marginTop: "30px"
   }
 
   if ( !user ) {
@@ -110,53 +116,71 @@ const App = () => {
 
         <form onSubmit={handleLogin}>
           <div>
-            username
-            <input
+            <TextField label ="username"
               id='username'
               value={username}
               onChange={({ target }) => setUsername(target.value)}
             />
           </div>
           <div>
-            password
-            <input
+            <TextField label="password"
               id='password'
               value={password}
               onChange={({ target }) => setPassword(target.value)}
             />
           </div>
-          <button id='login'>login</button>
+          <Button style ={buttonStyle} variant="contained" color ="secondary" type="submit" id='login'>
+          login</Button>
         </form>
       </div>
     )
   }
 
+
   const byLikes = (b1, b2) => b2.likes - b1.likes
 
   return (
-    <div>
-      <h2>blogs</h2>
+    <Container>
+      <div>
+        <h2>blogs</h2>
 
-      <Notification/>
+        <Notification/>
 
-      <p>
-        {user.name} logged in <button onClick={handleLogout}>logout</button>
-      </p>
+        <p>
+          {user.name} logged in <Button onClick={handleLogout}>logout</Button>
+        </p>
 
-      <Togglable buttonLabel='create new blog'  ref={blogFormRef}>
-        <NewBlog createBlog={createBlog} />
-      </Togglable>
+        <Togglable buttonLabel='create new blog'  ref={blogFormRef}>
+          <NewBlog createBlog={createBlog} notifyWith={notifyWith} />
+        </Togglable>
 
-      {blogs.sort(byLikes).map(blog =>
-        <Blog
-          key={blog.id}
-          blog={blog}
-          handleLike={handleLike}
-          handleRemove={handleRemove}
-          own={user.username===blog.user.username}
-        />
-      )}
-    </div>
+
+    <TableContainer component={Paper}>
+      <Table>
+        <TableBody>
+        {blogs.sort(byLikes).map(blog => (
+          <TableRow key={blog.id}>
+            <TableCell>
+              <Blog
+              key={blog.id}
+              blog={blog}
+              handleLike={handleLike}
+              handleRemove={handleRemove}
+              own={user.username===blog.user.username}
+             />
+            </TableCell>
+          </TableRow>
+        ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+    <Users/>
+    {users.map(u => (
+      <UserPage id={u.id}user={u} users={users} />
+    ))}
+      </div>
+    </Container>
   )
 }
 

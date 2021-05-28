@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { addBlog, createBlog } from '../reducers/blogsReducer'
+import { Button, TextField } from '@material-ui/core'
 
 const NewBlog = (props) => {
   const [title, setTitle] = useState('')
@@ -14,12 +15,21 @@ const NewBlog = (props) => {
     const author = event.target.author.value
     const title = event.target.title.value
     const url = event.target.title.value
+    /*
     event.target.author.value = ''
     event.target.title.value = ''
-    event.target.url.value = ''
+    event.target.url.value = ''*/
+    setAuthor('')
+    setTitle('')
+    setUrl('')
 
     dispatch(addBlog(author, title, url))
-    //setnotification
+    props.notifyWith(`New blog ${title} by ${author} added successfully!`, 'success')
+  }
+
+  const buttonStyle = {
+    marginTop: 10,
+    marginBottom: 10,
   }
 
   return (
@@ -27,30 +37,27 @@ const NewBlog = (props) => {
       <h2>create new</h2>
       <form onSubmit={handleNewBlog}>
         <div>
-          author
-          <input
+          <TextField label="author" 
             id='author'
             value={author}
             onChange={({ target }) => setAuthor(target.value)}
           />
         </div>
         <div>
-          title
-          <input
+          <TextField label="title" 
             id='title'
             value={title}
             onChange={({ target }) => setTitle(target.value)}
           />
         </div>
         <div>
-          url
-          <input
+          <TextField label="url" 
             id='url'
             value={url}
             onChange={({ target }) => setUrl(target.value)}
           />
         </div>
-        <button id="create">create</button>
+        <Button type="submit" style={buttonStyle} variant="contained" color="primary" id="create">create</Button>
       </form>
     </div>
   )

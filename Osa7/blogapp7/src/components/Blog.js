@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
+import { Button } from '@material-ui/core'
+import Box from '@material-ui/core/Box'
 
 const Blog = ({ blog, handleLike, handleRemove, own }) => {
   const [visible, setVisible] = useState(false)
@@ -7,8 +9,6 @@ const Blog = ({ blog, handleLike, handleRemove, own }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
     marginBottom: 5
   }
 
@@ -18,22 +18,32 @@ const Blog = ({ blog, handleLike, handleRemove, own }) => {
     handleLike(blog.id)
   }
 
+  const likeStyle = {
+    color: "green",
+    margin: "10px"
+  }
+
+
   return (
-    <div style={blogStyle} className='blog'>
+    <Box component="span" m={2}>
       <div>
-        <i>{blog.title}</i> by {blog.author} <button onClick={() => setVisible(!visible)}>{label}</button>
+        <i>{blog.title}</i> by {blog.author}
+        <Button style={{float: 'right'}}
+          onClick={() => setVisible(!visible)}>
+          {label}
+          </Button>
       </div>
       {visible&&(
         <div>
           <div>{blog.url}</div>
           <div>likes {blog.likes}
-            <button onClick={like}>like</button>
+            <Button variant="outlined" style={likeStyle} onClick={like}>like</Button>
           </div>
           <div>{blog.user.name}</div>
-          {own&&<button onClick={() => handleRemove(blog)}>remove</button>}
+          {own&&<Button variant="outlined" margin="10px" color="secondary" onClick={() => handleRemove(blog)}>remove</Button>}
         </div>
       )}
-    </div>
+    </Box>
   )
 }
 
