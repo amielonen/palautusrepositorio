@@ -31,6 +31,9 @@ import {
   TableContainer,
   TableRow,
   Paper,
+  AppBar,
+  Toolbar,
+  IconButton,
 } from '@material-ui/core'
 import UserPage from './components/UserPage'
 
@@ -50,15 +53,15 @@ const App = () => {
   const blogs = useSelector(state => state.blogs)
 
   useEffect(() => {
-     //haetaan storagesta user muuttujaan
-    dispatch(initializeUser) //dispatsataan user storeen
+    const user = storage.loadUser()
+    dispatch(initializeUser(user)) //dispatsataan user storeen
   }, [dispatch])
 
   useEffect(() => {
     dispatch(initUsers())
   }, [dispatch])
 
- const users = useSelector(state => state.users)
+  const users = useSelector(state => state.users)
 
   const user = useSelector(state => state.user)
 
@@ -75,7 +78,6 @@ const App = () => {
       const user = await loginService.login({
         username, password
       })
-
       setUsername('')
       setPassword('')
       dispatch(setUser(user))
@@ -141,7 +143,23 @@ const App = () => {
 
   return (
     <Container>
+      <Router>
       <div>
+
+        <AppBar position="static">
+          <Toolbar>
+            <IconButton edge="start" color="inherit" aria-label="menu">
+            </IconButton>
+            <Button color="inherit">
+              <Link to="/">home</Link>
+            </Button>
+            <Button color="inherit">
+              <Link to="/users">users</Link>
+            </Button>
+          </Toolbar>
+        </AppBar>
+
+
         <h2>blogs</h2>
 
         <Notification/>
@@ -149,37 +167,42 @@ const App = () => {
         <p>
           {user.name} logged in <Button onClick={handleLogout}>logout</Button>
         </p>
-
-        <Togglable buttonLabel='create new blog'  ref={blogFormRef}>
-          <NewBlog createBlog={createBlog} notifyWith={notifyWith} />
-        </Togglable>
-
-
-    <TableContainer component={Paper}>
-      <Table>
-        <TableBody>
-        {blogs.sort(byLikes).map(blog => (
-          <TableRow key={blog.id}>
-            <TableCell>
-              <Blog
-              key={blog.id}
-              blog={blog}
-              handleLike={handleLike}
-              handleRemove={handleRemove}
-              own={user.username===blog.user.username}
-             />
-            </TableCell>
-          </TableRow>
-        ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-
-    <Users/>
-    {users.map(u => (
-      <UserPage id={u.id}user={u} users={users} />
-    ))}
       </div>
+
+      <Switch>
+      <Route path="/users/:id">
+        <UserPage />
+      </Route>
+        <Route path="/users">
+          <Users/>
+        </Route>
+        <Route path="/">
+          <Togglable buttonLabel='create new blog'  ref={blogFormRef}>
+            <NewBlog createBlog={createBlog} notifyWith={notifyWith} />
+          </Togglable>
+          
+            <TableContainer component={Paper}>
+              <Table>
+                <TableBody>
+                  {blogs.sort(byLikes).map(blog => (
+                    <TableRow key={blog.id}>
+                      <TableCell>
+                        <Blog
+                        key={blog.id}
+                        blog={blog}
+                        handleLike={handleLike}
+                        handleRemove={handleRemove}
+                        own={user.username===blog.user.username}
+                      />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+        </Route>
+      </Switch>
+      </Router>
     </Container>
   )
 }

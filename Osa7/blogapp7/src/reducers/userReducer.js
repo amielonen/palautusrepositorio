@@ -1,8 +1,7 @@
 import storage from '../utils/storage'
 
-export const initializeUser = () => {
+export const initializeUser = (user) => {
     return async dispatch => {
-        const user = storage.loadUser()
         dispatch({
             type: 'INIT_USER',
             data: user,
